@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense, useRef } from "react";
 import { format } from "date-fns";
 import {
   List,
-  Smiley,
   Check,
   X,
   Robot,
@@ -14,12 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import {
-  EmojiPicker,
-  EmojiPickerContent,
-  EmojiPickerFooter,
-  EmojiPickerSearch,
-} from "@/components/ui/emoji-picker";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -154,7 +148,6 @@ export default function Todo() {
   const [todos, setTodos] = useLocalStorage<TodoItem[]>("todos", []);
   const [newTodo, setNewTodo] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedEmoji, setSelectedEmoji] = useState<string>("😊");
   const [selectedModel, setSelectedModel] = useLocalStorage<Model>(
     "selectedModel",
     "statements-default"
@@ -162,7 +155,6 @@ export default function Todo() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
-  const [editEmoji, setEditEmoji] = useState("");
   const [showFaqDialog, setShowFaqDialog] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -260,7 +252,6 @@ export default function Todo() {
       const actions = (
         await determineAction(
           text,
-          selectedEmoji || "",
           filteredTodos,
           selectedModel,
           timezone
@@ -278,7 +269,6 @@ export default function Todo() {
                 id: Math.random().toString(36).substring(7),
                 text: action.text || text,
                 completed: false,
-                emoji: action.emoji || selectedEmoji,
                 date: todoDate,
                 time: action.time,
                 category: action.category,
@@ -324,7 +314,6 @@ export default function Todo() {
                 todoId: action.todoId,
                 newText: action.text,
                 newDate: action.targetDate,
-                newEmoji: action.emoji,
               });
 
               newTodos = newTodos.map((todo) => {
@@ -332,7 +321,6 @@ export default function Todo() {
                   const updatedTodo = serializeTodo({
                     ...todo,
                     text: action.text || todo.text,
-                    emoji: action.emoji || todo.emoji,
                     date: action.targetDate
                       ? new Date(action.targetDate)
                       : todo.date,
@@ -397,7 +385,6 @@ export default function Todo() {
           id: Math.random().toString(36).substring(7),
           text,
           completed: false,
-          emoji: selectedEmoji,
           date: selectedDate,
         }),
       ]);
@@ -418,16 +405,14 @@ export default function Todo() {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
 
-  const startEditing = (id: string, text: string, emoji?: string) => {
+  const startEditing = (id: string, text: string) => {
     setEditingTodoId(id);
     setEditText(text);
-    setEditEmoji(emoji || "");
   };
 
   const cancelEditing = () => {
     setEditingTodoId(null);
     setEditText("");
-    setEditEmoji("");
   };
 
   const handleEditTodo = (updatedTodo: TodoItem) => {
@@ -440,7 +425,6 @@ export default function Todo() {
             const updated = serializeTodo({
               ...todo,
               text: updatedTodo.text,
-              emoji: updatedTodo.emoji,
               time: updatedTodo.time,
             });
             console.log("Updated todo:", updated);
@@ -452,7 +436,6 @@ export default function Todo() {
     }
     setEditingTodoId(null);
     setEditText("");
-    setEditEmoji("");
   };
 
   const clearAllTodos = () => {
@@ -592,9 +575,7 @@ export default function Todo() {
                         onEdit={startEditing}
                         editingTodoId={editingTodoId}
                         editText={editText}
-                        editEmoji={editEmoji}
                         setEditText={setEditText}
-                        setEditEmoji={setEditEmoji}
                         handleEditTodo={handleEditTodo}
                         cancelEditing={cancelEditing}
                       />
@@ -608,9 +589,7 @@ export default function Todo() {
                         onEdit={startEditing}
                         editingTodoId={editingTodoId}
                         editText={editText}
-                        editEmoji={editEmoji}
                         setEditText={setEditText}
-                        setEditEmoji={setEditEmoji}
                         handleEditTodo={handleEditTodo}
                         cancelEditing={cancelEditing}
                       />
@@ -676,44 +655,7 @@ export default function Todo() {
           </DropdownMenu>
 
           <div className="flex-1 flex items-center bg-muted/30 hover:bg-muted/50 transition-colors rounded-full px-2 border border-transparent focus-within:border-border focus-within:bg-background focus-within:shadow-sm">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 shrink-0 rounded-full hover:bg-muted/50"
-                  disabled={isLoading}
-                >
-                  {selectedEmoji ? (
-                    <span className="text-lg leading-none mt-0.5">{selectedEmoji}</span>
-                  ) : (
-                    <Smiley
-                      className="w-5 h-5 text-muted-foreground"
-                      weight="fill"
-                    />
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-[280px] p-0 rounded-lg"
-                side="top"
-                align="start"
-                sideOffset={12}
-              >
-                <div className="flex h-[300px] w-full items-center justify-center p-0">
-                  <EmojiPicker
-                    onEmojiSelect={(emoji: any) => {
-                      setSelectedEmoji(emoji.emoji);
-                    }}
-                    className="h-full"
-                  >
-                    <EmojiPickerSearch placeholder="Search emoji..." />
-                    <EmojiPickerContent className="h-[220px]" />
-                    <EmojiPickerFooter className="border-t-0 p-1.5" />
-                  </EmojiPicker>
-                </div>
-              </PopoverContent>
-            </Popover>
+
 
             <Input
               ref={inputRef}

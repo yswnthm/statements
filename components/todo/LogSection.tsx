@@ -2,20 +2,9 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, PencilSimple, Check, Smiley, Clock, CaretRight, CaretDown } from "@phosphor-icons/react";
+import { X, PencilSimple, Check, Clock, CaretRight, CaretDown } from "@phosphor-icons/react";
 import { TodoListProps } from "@/types";
 import { useRef, useCallback, useState, useEffect } from "react";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-    EmojiPicker,
-    EmojiPickerContent,
-    EmojiPickerFooter,
-    EmojiPickerSearch,
-} from "@/components/ui/emoji-picker";
 import { TimePicker, formatTimeDisplay } from "./TimePicker";
 
 export function LogSection({
@@ -25,9 +14,7 @@ export function LogSection({
     onEdit,
     editingTodoId,
     editText,
-    editEmoji,
     setEditText,
-    setEditEmoji,
     handleEditTodo,
     cancelEditing,
 }: TodoListProps) {
@@ -98,43 +85,6 @@ export function LogSection({
                                 <>
                                     <div className="flex-1 flex items-center gap-2 py-0.5">
                                         <div className="flex items-center gap-1.5 rounded-lg bg-background p-1 flex-1 ring-1 ring-border shadow-sm h-8">
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-6 w-6 shrink-0 rounded hover:bg-muted"
-                                                    >
-                                                        {editEmoji ? (
-                                                            <span className="text-sm">{editEmoji}</span>
-                                                        ) : (
-                                                            <Smiley
-                                                                className="w-3.5 h-3.5 text-muted-foreground"
-                                                                weight="fill"
-                                                            />
-                                                        )}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent
-                                                    className="w-[280px] p-0 rounded-xl"
-                                                    side="top"
-                                                    align="start"
-                                                    sideOffset={12}
-                                                >
-                                                    <div className="flex h-[300px] w-full items-center justify-center p-0">
-                                                        <EmojiPicker
-                                                            onEmojiSelect={(emoji: any) => {
-                                                                setEditEmoji(emoji.emoji);
-                                                            }}
-                                                            className="h-full"
-                                                        >
-                                                            <EmojiPickerSearch placeholder="Search emoji..." />
-                                                            <EmojiPickerContent className="h-[220px]" />
-                                                            <EmojiPickerFooter className="border-t-0 p-1.5" />
-                                                        </EmojiPicker>
-                                                    </div>
-                                                </PopoverContent>
-                                            </Popover>
 
                                             <Input
                                                 ref={editInputRef}
@@ -145,7 +95,6 @@ export function LogSection({
                                                         handleEditTodo({
                                                             ...todo,
                                                             text: editText,
-                                                            emoji: editEmoji,
                                                             time: editTime,
                                                         });
                                                     } else if (e.key === "Escape") {
@@ -181,7 +130,6 @@ export function LogSection({
                                                     const updatedTodo = {
                                                         ...todo,
                                                         text: editText,
-                                                        emoji: editEmoji,
                                                         time: editTime,
                                                     };
                                                     handleEditTodo(updatedTodo);
@@ -197,11 +145,6 @@ export function LogSection({
                                     <div
                                         className="flex-1 flex items-center min-w-0 cursor-default"
                                     >
-                                        {todo.emoji && (
-                                            <span className="mr-2 text-sm flex-shrink-0 leading-none text-muted-foreground/80 opacity-70 group-hover:opacity-100 transition-opacity">
-                                                {todo.emoji}
-                                            </span>
-                                        )}
                                         <div className="flex items-center min-w-0 gap-2 flex-1">
                                             <span
                                                 className={cn(
@@ -225,7 +168,7 @@ export function LogSection({
                                             className="h-6 w-6 text-muted-foreground/50 hover:text-foreground rounded"
                                             onClick={(e: React.MouseEvent) => {
                                                 e.stopPropagation();
-                                                onEdit(todo.id, todo.text, todo.emoji);
+                                                onEdit(todo.id, todo.text);
                                             }}
                                         >
                                             <PencilSimple className="w-3 h-3" weight="bold" />

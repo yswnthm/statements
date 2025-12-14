@@ -6,7 +6,6 @@ export type DetermineActionResponse = {
         action: "add" | "delete" | "mark" | "sort" | "edit" | "clear";
         text?: string;
         todoId?: string;
-        emoji?: string;
         targetDate?: string;
         time?: string; // Optional time in HH:mm format
         sortBy?: "newest" | "oldest" | "alphabetical" | "completed";
@@ -19,7 +18,6 @@ export type DetermineActionResponse = {
 
 export type DetermineActionFn = (
     text: string,
-    emoji?: string,
     todos?: TodoItem[],
     model?: Model,
     timezone?: string

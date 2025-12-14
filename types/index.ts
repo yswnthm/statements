@@ -2,7 +2,6 @@ export interface TodoItem {
   id: string;
   text: string;
   completed: boolean;
-  emoji?: string;
   date: Date;
   time?: string; // Optional time in HH:mm format
   category?: "goal" | "task" | "reminder" | "statement";
@@ -20,12 +19,10 @@ export interface TodoListProps {
   todos: TodoItem[];
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
-  onEdit: (id: string, text: string, emoji?: string) => void;
+  onEdit: (id: string, text: string) => void;
   editingTodoId: string | null;
   editText: string;
-  editEmoji: string;
   setEditText: (text: string) => void;
-  setEditEmoji: (emoji: string) => void;
   handleEditTodo: (todo: TodoItem) => void;
   cancelEditing: () => void;
 }

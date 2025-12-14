@@ -6,9 +6,9 @@ import { z } from "zod";
 import { elevenlabs } from '@ai-sdk/elevenlabs';
 import { DetermineActionFn } from "@/types/actions";
 
-export const determineAction: DetermineActionFn = async (text, emoji, todos, model = "statements-default", timezone = "UTC") => {
+export const determineAction: DetermineActionFn = async (text, todos, model = "statements-default", timezone = "UTC") => {
     console.log("Determining action...");
-    console.log(text, emoji, todos);
+    console.log(text, todos);
     console.log("Model:", model);
     console.log("Timezone:", timezone);
 
@@ -53,7 +53,6 @@ export const determineAction: DetermineActionFn = async (text, emoji, todos, mod
     const prompt = `
         Today's date is: ${todayStr} (Timezone: ${timezone})
         The user has entered the following text: ${text}
-        ${emoji ? `The user has also entered the following emoji: ${emoji}` : ""}
         
         You are the AI for "Statements", a personal micro-blogging application where "the network is you".
         Your goal is to organize the user's thoughts into a structured feed of "Statements".
@@ -99,7 +98,7 @@ export const determineAction: DetermineActionFn = async (text, emoji, todos, mod
         - Prioritize the user's specific emoji if provided.
         
         ${todos ? `<todo_list>
-        ${todos?.map(todo => `- ${todo.id}: ${todo.text} (${todo.emoji})`).join("\n")}
+        ${todos?.map(todo => `- ${todo.id}: ${todo.text}`).join("\n")}
         </todo_list>` : ""}
 
         ## Quantitative Updates
@@ -138,7 +137,6 @@ export const determineAction: DetermineActionFn = async (text, emoji, todos, mod
                 action: z.enum(["add", "delete", "mark", "sort", "edit", "clear",]).describe("The action to take"),
                 text: z.string().describe("The text of the todo item.").optional(),
                 todoId: z.string().describe("The id of the todo item to act upon").optional(),
-                emoji: z.string().describe("The emoji of the todo item").optional(),
                 targetDate: z.string().describe("The target date for the todo item in YYYY-MM-DD format").optional(),
                 time: z.string().describe("The time for the todo item in HH:mm format (24-hour)").optional(),
                 category: z.enum(["goal", "task", "reminder", "statement"]).describe("The category of the statement").optional(),

@@ -1,21 +1,10 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, PencilSimple, Check, Smiley, Clock } from "@phosphor-icons/react";
+import { X, PencilSimple, Check, Clock } from "@phosphor-icons/react";
 import { CircleCheckbox } from "./CircleCheckbox";
 import { TodoListProps } from "@/types";
 import { useRef, useCallback, useState, useEffect } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  EmojiPicker,
-  EmojiPickerContent,
-  EmojiPickerFooter,
-  EmojiPickerSearch,
-} from "@/components/ui/emoji-picker";
 import { TimePicker, formatTimeDisplay } from "./TimePicker";
 
 export function TodoList({
@@ -25,9 +14,7 @@ export function TodoList({
   onEdit,
   editingTodoId,
   editText,
-  editEmoji,
   setEditText,
-  setEditEmoji,
   handleEditTodo,
   cancelEditing,
 }: TodoListProps) {
@@ -87,8 +74,8 @@ export function TodoList({
         <div
           key={todo.id}
           className={cn(
-            "group flex items-start px-4 py-3 gap-3 rounded-xl transition-all duration-200",
-            todo.completed ? "opacity-50" : "hover:bg-muted/30",
+            "group flex items-start px-4 py-1 gap-2 rounded-lg transition-all duration-200",
+            todo.completed ? "opacity-50" : "hover:bg-muted/40",
             editingTodoId === todo.id && "bg-muted/40",
             editingTodoId !== todo.id && "cursor-pointer"
           )}
@@ -101,44 +88,7 @@ export function TodoList({
           {editingTodoId === todo.id ? (
             <>
               <div className="flex-1 flex items-center gap-2 py-0.5">
-                <div className="flex items-center gap-2 rounded-xl bg-background p-1.5 flex-1 ring-1 ring-border shadow-sm">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0 rounded-lg hover:bg-muted"
-                      >
-                        {editEmoji ? (
-                          <span className="text-base">{editEmoji}</span>
-                        ) : (
-                          <Smiley
-                            className="w-4 h-4 text-muted-foreground"
-                            weight="fill"
-                          />
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[280px] p-0 rounded-xl"
-                      side="top"
-                      align="start"
-                      sideOffset={12}
-                    >
-                      <div className="flex h-[300px] w-full items-center justify-center p-0">
-                        <EmojiPicker
-                          onEmojiSelect={(emoji: any) => {
-                            setEditEmoji(emoji.emoji);
-                          }}
-                          className="h-full"
-                        >
-                          <EmojiPickerSearch placeholder="Search emoji..." />
-                          <EmojiPickerContent className="h-[220px]" />
-                          <EmojiPickerFooter className="border-t-0 p-1.5" />
-                        </EmojiPicker>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                <div className="flex items-center gap-2 rounded-lg bg-background p-1 flex-1 ring-1 ring-border shadow-sm h-8">
 
                   <Input
                     ref={editInputRef}
@@ -149,7 +99,6 @@ export function TodoList({
                         handleEditTodo({
                           ...todo,
                           text: editText,
-                          emoji: editEmoji,
                           time: editTime,
                         });
                       } else if (e.key === "Escape") {
@@ -157,41 +106,40 @@ export function TodoList({
                       }
                     }}
                     autoFocus
-                    className="flex-1 h-8 py-0 text-base bg-transparent border-0 shadow-none focus-visible:ring-0 px-2 rounded-none placeholder:text-muted-foreground/50"
+                    className="flex-1 h-6 py-0 text-sm bg-transparent border-0 shadow-none focus-visible:ring-0 px-1.5 rounded-none placeholder:text-muted-foreground/50"
                     placeholder="Edit todo..."
                   />
 
                   <TimePicker time={editTime} onChange={setEditTime} />
                 </div>
 
-                <div className="flex gap-1">
+                <div className="flex gap-0.5">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive rounded-full hover:bg-muted"
+                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive rounded-full hover:bg-muted"
                     onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       cancelEditing();
                     }}
                   >
-                    <X className="w-4 h-4" weight="bold" />
+                    <X className="w-3.5 h-3.5" weight="bold" />
                   </Button>
                   <Button
                     variant="default"
                     size="icon"
-                    className="h-9 w-9 shrink-0 rounded-full shadow-none"
+                    className="h-7 w-7 shrink-0 rounded-full shadow-none"
                     onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       const updatedTodo = {
                         ...todo,
                         text: editText,
-                        emoji: editEmoji,
                         time: editTime,
                       };
                       handleEditTodo(updatedTodo);
                     }}
                   >
-                    <Check className="w-4 h-4" weight="bold" />
+                    <Check className="w-3.5 h-3.5" weight="bold" />
                   </Button>
                 </div>
               </div>
@@ -211,57 +159,51 @@ export function TodoList({
                 />
               </div>
               <div
-                className="flex-1 flex items-start min-w-0 cursor-pointer pt-0.5"
+                className="flex-1 flex items-center min-w-0 cursor-pointer pt-0.5"
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onToggle(todo.id);
                 }}
               >
-                {todo.emoji && (
-                  <span className="mr-3 text-base flex-shrink-0 leading-normal">
-                    {todo.emoji}
-                  </span>
-                )}
-                <div className="flex flex-col min-w-0 gap-0.5">
+                <div className="flex items-center min-w-0 gap-2 flex-1">
                   <span
                     className={cn(
-                      "text-base leading-normal transition-all duration-200",
-                      todo.text.length > 50 && "text-[15px]",
-                      todo.completed && "line-through text-muted-foreground"
+                      "text-sm leading-normal transition-colors duration-200 text-muted-foreground/80 group-hover:text-muted-foreground",
+                      todo.text.length > 50 && "truncate",
+                      todo.completed && "line-through text-muted-foreground/60"
                     )}
                   >
                     {todo.text}
                   </span>
                   {todo.time && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
-                      <Clock className="w-3 h-3" weight="fill" />
-                      <span>{formatTimeDisplay(todo.time)}</span>
-                    </div>
+                    <span className="text-[10px] text-muted-foreground/40 font-medium">
+                      {formatTimeDisplay(todo.time)}
+                    </span>
                   )}
                 </div>
               </div>
-              <div className="flex opacity-0 group-hover:opacity-100 transition-opacity duration-200 gap-1">
+              <div className="flex opacity-0 group-hover:opacity-100 transition-opacity duration-200 gap-0.5">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+                  className="h-6 w-6 text-muted-foreground/50 hover:text-foreground rounded"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    onEdit(todo.id, todo.text, todo.emoji);
+                    onEdit(todo.id, todo.text);
                   }}
                 >
-                  <PencilSimple className="w-4 h-4" weight="bold" />
+                  <PencilSimple className="w-3 h-3" weight="bold" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full"
+                  className="h-6 w-6 text-muted-foreground/50 hover:text-destructive rounded"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     onDelete(todo.id);
                   }}
                 >
-                  <X className="w-4 h-4" weight="bold" />
+                  <X className="w-3 h-3" weight="bold" />
                 </Button>
               </div>
             </>
