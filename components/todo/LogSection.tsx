@@ -81,6 +81,11 @@ export function LogSection({
                                 }
                             }}
                         >
+                            <img
+                                src="/pfp2.JPG"
+                                alt="Profile"
+                                className="w-5 h-5 rounded-full object-cover select-none shrink-0"
+                            />
                             {editingTodoId === todo.id ? (
                                 <>
                                     <div className="flex-1 flex items-center gap-2 py-0.5">
