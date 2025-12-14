@@ -40,19 +40,7 @@ export function StatementCard({ item, onToggle, onDelete, onEdit, isLast }: Stat
         )}>
             {/* Avatar Column */}
             <div className="flex-shrink-0 relative flex flex-col items-center">
-                {/* Line going UP to previous? If we render per item. */}
-                {/* We just need a line going DOWN from this avatar to the next.
-                    Or a full height line passing through.
-                    Typical thread implementation:
-                    Line from top to bottom of the 'left rail'.
-                */}
-                <div className={cn(
-                    "absolute top-0 bottom-0 w-[1.5px] bg-[#222]",
-                    isLast ? "bottom-auto h-5" : ""
-                )} style={{ left: '50%', transform: 'translateX(-50%)' }}></div>
-
-                <div className="w-9 h-9 bg-muted rounded-full overflow-hidden relative z-10 box-content border-4 border-[#18181b]">
-                    {/* border-4 border-[#18181b] helps mask the line behind the avatar, matching the card bg which is approx zinc-900 (18181b is zinc-900) */}
+                <div className="w-9 h-9 bg-muted rounded-full overflow-hidden relative z-10">
                     <img src="/pfp2.JPG" alt="User" className="w-full h-full object-cover" />
                 </div>
             </div>
