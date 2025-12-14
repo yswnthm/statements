@@ -5,6 +5,8 @@ export interface TodoItem {
   emoji?: string;
   date: Date;
   time?: string; // Optional time in HH:mm format
+  category?: "goal" | "task" | "reminder" | "statement";
+  timeline?: "past" | "current" | "future";
 }
 
 export type SortOption = "newest" | "oldest" | "alphabetical" | "completed";

@@ -54,94 +54,58 @@ export const determineAction: DetermineActionFn = async (text, emoji, todos, mod
         Today's date is: ${todayStr} (Timezone: ${timezone})
         The user has entered the following text: ${text}
         ${emoji ? `The user has also entered the following emoji: ${emoji}` : ""}
-        Determine the action or multiple actions to take based on the given context.
-        Return an array of actions.
+        
+        You are the AI for "Statements", a personal micro-blogging application where "the network is you".
+        Your goal is to organize the user's thoughts into a structured feed of "Statements".
+        
+        ## Core Concepts
+        
+        ### 1. Timelines (The "When")
+        Classify the statement into one of three timelines:
+        - **Past Self** ("past"): Actions completed, history, reflection. (e.g., "I ran 5km", "I read a book").
+        - **Current Self** ("current"): What is happening now, current focus. (e.g., "Reading a book", "Working on project").
+        - **Future Self** ("future"): Aspirations, planned actions, queue. (e.g., "I want to run", "Buy milk", "Remind me").
+        
+        ### 2. Categories (The "What")
+        Classify the statement into one of these categories:
+        - **Goal** ("goal"): Long-term objectives, aspirations, desires. (e.g., "Run 3km everyday", "Read 12 books this year"). usually associated with "want to", "aiming to".
+        - **Task** ("task"): Actionable items, to-dos. (e.g., "Buy running shoes", "Call Mom").
+        - **Reminder** ("reminder"): Time-sensitive alerts. (e.g., "Remind me to call at 5pm").
+        - **Statement** ("statement"): General thoughts, observations, or updates that don't fit strictly into the above (default for generic posts).
 
-        Don't make assumptions about the user's intent, the todo list is very important to understand the user's intent.
-        Go through the todo list and make sure to understand the user's intent based on the todo list.
-        All the text should be in lowercase!!
-        Never add existing todos to the list, only add new todos, but perform actions on existing todos.
-        Be very mindful of the user's intent, they may want to add a todo, but they may also want to delete a todo, mark a todo as complete, or edit a todo.
-        Take some humor into account, the user may be joking around or being sarcastic.
-
-        The user can specify dates in their commands like:
+        ## Date & Time Parsing
+        The user can specify dates and times naturally.
         - "add buy groceries today" -> targetDate: ${todayStr}
         - "add buy groceries tomorrow" -> targetDate: ${tomorrowStr}
-        - "add meeting with John next monday"
-        - "add dentist appointment on friday"
-        - "add vacation planning for next week"
-        - "add homework due in 3 days"
+        - "meeting at 3pm tomorrow" -> time: "15:00", targetDate: ${tomorrowStr}
         
-        Extract the date from these commands and set it accordingly. If no date is specified, use the currently selected date.
-        Parse relative dates like "today", "tomorrow", "next week", "in 3 days", etc.
-        For specific days like "monday", "tuesday", etc., use the next occurrence of that day.
-        Always return dates in YYYY-MM-DD format.
-
-        The user can specify time in their commands in various natural ways:
-        Examples with time:
-        - "meeting with John at 3pm tomorrow" -> text: "meeting with John", time: "15:00", targetDate: ${tomorrowStr}
-        - "dentist appointment at 2:30" -> text: "dentist appointment", time: "14:30", targetDate: ${todayStr}
-        - "call mom at 9am" -> text: "call mom", time: "09:00"
-        - "lunch with team at 12:15pm" -> text: "lunch with team", time: "12:15"
-        - "daily standup at 10" -> text: "daily standup", time: "10:00"
-        - "gym session 7am tomorrow" -> text: "gym session", time: "07:00", targetDate: ${tomorrowStr}
-        - "movie night at 8:30pm friday" -> text: "movie night", time: "20:30"
-        - "coffee break 3:30" -> text: "coffee break", time: "15:30"
+        Extract the date (YYYY-MM-DD) and time (HH:mm, 24-hour).
+        If no date is specified:
+        - For "future" timeline items (tasks/reminders), default to today (${todayStr}) unless "someday" is implied.
+        - For "past" items, default to today if it just happened, or infer from context (e.g., "yesterday").
         
-        Extract time in 24-hour format (HH:mm). Support various time formats:
-        - "3pm" -> "15:00"
-        - "3:30pm" -> "15:30"
-        - "15:00" -> "15:00"
-        - "9" -> "09:00"
-        - "9:15am" -> "09:15"
-        - "12" -> "12:00"
-        - "12:30pm" -> "12:30"
+        ## Logic
+        - **Analyze the User's Intent**:
+            - "I want to start running" -> Action: "add", Text: "Start running", Timeline: "future", Category: "goal"
+            - "Buy milk" -> Action: "add", Text: "Buy milk", Timeline: "future", Category: "task"
+            - "I ran 5km" -> Action: "add", Text: "Ran 5km", Timeline: "past", Category: "statement" (or task if tracking completion)
+        - **Existing Todos**:
+            - You have access to the current list.
+            - If the user says "I bought milk" and "Buy milk" is in the list -> Action: "mark", Status: "complete", TodoId: <id>.
+            - If not in list, maybe they just want to log it -> Action: "add", Timeline: "past".
         
-        If no time is specified, omit the time field.
-        Always extract the actual task text separately from the time and date information.
-        Keep emojis relevant to both the task and time (e.g., ⏰, 🕐, or 📅 for time-sensitive tasks).
-
-${todos ? `<todo_list>
-${todos?.map(todo => `- ${todo.id}: ${todo.text} (${todo.emoji})`).join("\n")}
-</todo_list>` : ""}
-
-        The action should be one of the following: ${["add", "delete", "mark", "sort", "edit", "clear"].join(", ")}
-        - If the action is "add", the text, emoji, and targetDate should be included.
-        - If the action is "delete", the todoId should be included.
-        - If the action is "mark", the todoId should be included and the status should be "complete" or "incomplete".
-        - If the action is "sort", the sortBy should be included.
-        - If the action is "edit", both the todoId (to identify the todo to edit) and the text (the new content) should be included.
-        - If the action is "clear", the user wants to clear the list of todos with the given listToClear(all, completed, incomplete).
+        ## Humor & Personality
+        - Be helpful but recognize the user's tone.
+        - Prioritize the user's specific emoji if provided.
         
-        For the add action, the text should be in the future tense. like "buy groceries", "make a post with @theo", "go for violin lesson"
-        ${emoji ? `Change the emoji to a more appropriate based on the text. The current emoji is: ${emoji}` : ""}
-     
-        Some queries will be ambiguous stating the tense of the text, which will allow you to infer the correct action to take on the todo list. 
-        The add requests will mostly likey to be in the future tense, while the complete requests will be in the past tense.
-        The emojis sent by the user should be prioritized and not changed unless they don't match the todo's intent.
-        The todo list is very important to understand the user's intent.
-        
-        IMPORTANT: You must always use the todo's ID for the actions delete, mark, and edit. Do not use the text to identify todos.
-        Example: "todo id: '123abc', todo text: 'buy groceries', user request: 'bought groceries', action: 'mark', todoId: '123abc', status: 'complete'"
-        Example: "todo id: '456def', todo text: 'make a post with @theo', user request: 'i made a post with @theo', action: 'mark', todoId: '456def', status: 'complete'"
-        Example: "request: 'buy groceries today', action: 'add', text: 'buy groceries', emoji: '🛒', targetDate: '${todayStr}'"
-        Example: "request: 'buy groceries tomorrow', action: 'add', text: 'buy groceries', emoji: '🛒', targetDate: '${tomorrowStr}'"
+        ${todos ? `<todo_list>
+        ${todos?.map(todo => `- ${todo.id}: ${todo.text} (${todo.emoji})`).join("\n")}
+        </todo_list>` : ""}
 
-        The edit request will mostly be ambiguous, so make the edit as close to the original as possible to maintain the user's context with the todo to edit.
-        Some word could be incomplete, like "meet" instead of "meeting", make sure to edit the todo based on the todo list since the todo already exists just needs a rewrite.
-
-        Example edit requests:
-        "todo id: '789ghi', original text: 'meeting w/ John', user request: 'i meant meet Jane', action: 'edit', todoId: '789ghi', text: 'meeting w/ Jane'"
-        "todo id: '012jkl', original text: 'buy groceries', user request: 'i meant buy flowers', action: 'edit', todoId: '012jkl', text: 'buy flowers'"
-        "todo id: '345mno', original text: 'go for violin lesson', user request: 'i meant go for a walk', action: 'edit', todoId: '345mno', text: 'go for a walk'"
-
-        Example clear requests:
-        "user request: 'clear all todos', action: 'clear', listToClear: 'all'"
-        "user request: 'clear my completed tasks', action: 'clear', listToClear: 'completed'"
-        "user request: 'remove all incomplete items', action: 'clear', listToClear: 'incomplete'"
-        "user request: 'start fresh', action: 'clear', listToClear: 'all'"
-        "user request: 'delete finished tasks', action: 'clear', listToClear: 'completed'"
-        "user request: 'clean up my list', action: 'clear', listToClear: 'all'"
+        ## strict rules
+        - **Always** return an array of actions.
+        - **Actions**: ${["add", "delete", "mark", "sort", "edit", "clear"].join(", ")}
+        - **Format**: Lowercase text for the todo content.
     `;
 
     console.log("prompt", prompt);
@@ -162,6 +126,8 @@ ${todos?.map(todo => `- ${todo.id}: ${todo.text} (${todo.emoji})`).join("\n")}
                 emoji: z.string().describe("The emoji of the todo item").optional(),
                 targetDate: z.string().describe("The target date for the todo item in YYYY-MM-DD format").optional(),
                 time: z.string().describe("The time for the todo item in HH:mm format (24-hour)").optional(),
+                category: z.enum(["goal", "task", "reminder", "statement"]).describe("The category of the statement").optional(),
+                timeline: z.enum(["past", "current", "future"]).describe("The timeline the statement belongs to").optional(),
                 sortBy: z.enum(
                     ["newest", "oldest", "alphabetical", "completed"]
                 ).describe("The sort order").optional(),
