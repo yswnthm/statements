@@ -42,9 +42,9 @@ export const sortTodos = (todos: TodoItem[], sortBy: string) => {
   return [...todos].sort((a, b) => {
     switch (sortBy) {
       case "newest":
-        return b.id.localeCompare(a.id);
+        return (b.createdAt || 0) - (a.createdAt || 0);
       case "oldest":
-        return a.id.localeCompare(b.id);
+        return (a.createdAt || 0) - (b.createdAt || 0);
       case "alphabetical":
         return a.text.localeCompare(b.text);
       case "completed":

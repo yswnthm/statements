@@ -6,6 +6,7 @@ export interface TodoItem {
   time?: string; // Optional time in HH:mm format
   category?: "goal" | "task" | "reminder" | "statement";
   timeline?: "past" | "current" | "future";
+  createdAt: number;
 }
 
 export type SortOption = "newest" | "oldest" | "alphabetical" | "completed";

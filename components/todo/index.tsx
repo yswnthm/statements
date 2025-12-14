@@ -110,6 +110,7 @@ export default function Todo() {
                 time: action.time,
                 category: action.category,
                 timeline: action.timeline,
+                createdAt: Date.now(),
               })
             );
             break;
@@ -172,6 +173,7 @@ export default function Todo() {
           text,
           completed: false,
           date: selectedDate,
+          createdAt: Date.now(),
         }),
       ]);
     } finally {
