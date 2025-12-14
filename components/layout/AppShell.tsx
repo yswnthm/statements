@@ -14,16 +14,15 @@ export function AppShell({ children, className, onComposeClick }: AppShellProps)
         <div className={cn("min-h-screen bg-background text-foreground flex", className)}>
             <Sidebar onComposeClick={onComposeClick} />
 
-            <main className="flex-1 w-full md:pl-[72px]">
-                <div className="max-w-[620px] mx-auto w-full min-h-screen border-x border-border/40">
+            <main className="flex-1 w-full md:pl-[88px]">
+                <div className="max-w-[620px] mx-auto w-full min-h-screen border-x border-border/40 bg-zinc-900/50">
                     {children}
                 </div>
             </main>
 
-            {/* Right spacer for centering if needed, or right sidebar later */}
-            <div className="hidden xl:block w-[350px] p-4">
-                {/* Optional Right Sidebar Content */}
-            </div>
+            {/* Right spacer removed for centering */}
+            {/* <div className="hidden xl:block w-[350px] p-4">
+            </div> */}
         </div>
     );
 }
