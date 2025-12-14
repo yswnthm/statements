@@ -15,7 +15,7 @@ export function AppShell({ children, className, onComposeClick }: AppShellProps)
             <Sidebar onComposeClick={onComposeClick} />
 
             <main className="flex-1 w-full md:pl-[88px]">
-                <div className="max-w-[620px] mx-auto w-full min-h-screen border-x border-border/40 bg-zinc-900/50">
+                <div className="max-w-[620px] mx-auto w-full min-h-screen">
                     {children}
                 </div>
             </main>

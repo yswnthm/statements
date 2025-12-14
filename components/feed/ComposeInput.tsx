@@ -36,7 +36,7 @@ export function ComposeInput({ onPost, isLoading, defaultValue = "" }: ComposeIn
     };
 
     return (
-        <div className="flex gap-3 p-4 border-b border-border/40">
+        <div className="flex gap-3 p-4">
             <div className="flex-shrink-0 pt-1">
                 <div className="w-9 h-9 bg-muted rounded-full overflow-hidden">
                     {/* Placeholder Avatar - replace with actual user avatar if available */}

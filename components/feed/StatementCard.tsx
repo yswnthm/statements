@@ -26,24 +26,35 @@ interface StatementCardProps {
     onToggle?: (id: string) => void;
     onDelete?: (id: string) => void;
     onEdit?: (id: string, text: string) => void;
+    isLast?: boolean;
 }
 
-export function StatementCard({ item, onToggle, onDelete, onEdit }: StatementCardProps) {
+export function StatementCard({ item, onToggle, onDelete, onEdit, isLast }: StatementCardProps) {
     const isCompleted = item.completed;
     const isTodo = !item.completed && ["task", "reminder", "goal"].includes(item.category || "") || item.timeline === "future"; // Reuse logic or pass it down
 
     return (
         <div className={cn(
-            "flex gap-3 p-4 border-b border-border/40 hover:bg-muted/10 transition-colors cursor-pointer group animate-in fade-in duration-300",
+            "flex gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors cursor-pointer group animate-in fade-in duration-300 relative",
             isCompleted && "opacity-60"
         )}>
             {/* Avatar Column */}
-            <div className="flex-shrink-0 relative">
-                <div className="w-9 h-9 bg-muted rounded-full overflow-hidden">
-                    {/* Placeholder Avatar */}
+            <div className="flex-shrink-0 relative flex flex-col items-center">
+                {/* Line going UP to previous? If we render per item. */}
+                {/* We just need a line going DOWN from this avatar to the next.
+                    Or a full height line passing through.
+                    Typical thread implementation:
+                    Line from top to bottom of the 'left rail'.
+                */}
+                <div className={cn(
+                    "absolute top-0 bottom-0 w-[1.5px] bg-[#222]",
+                    isLast ? "bottom-auto h-5" : ""
+                )} style={{ left: '50%', transform: 'translateX(-50%)' }}></div>
+
+                <div className="w-9 h-9 bg-muted rounded-full overflow-hidden relative z-10 box-content border-4 border-[#18181b]">
+                    {/* border-4 border-[#18181b] helps mask the line behind the avatar, matching the card bg which is approx zinc-900 (18181b is zinc-900) */}
                     <img src="/pfp2.JPG" alt="User" className="w-full h-full object-cover" />
                 </div>
-                {/* Thread line could go here if threaded */}
             </div>
 
             {/* Content Column */}

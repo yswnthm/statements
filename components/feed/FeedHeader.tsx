@@ -12,7 +12,7 @@ interface FeedHeaderProps {
 
 export function FeedHeader({ className, activeTab, onTabChange }: FeedHeaderProps) {
     return (
-        <div className={cn("sticky top-0 z-40 backdrop-blur-md bg-zinc-900/80 border-b border-border/40 px-4", className)}>
+        <div className={cn("sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-2", className)}>
             <div className="flex items-center justify-between h-14">
                 <div className="flex-1 flex justify-center gap-8">
                     <button

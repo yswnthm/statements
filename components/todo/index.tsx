@@ -211,58 +211,63 @@ export default function Todo() {
     <AppShell onComposeClick={() => setIsComposeOpen(true)}>
       <FeedHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="pb-24">
-        <ComposeInput
-          onPost={handleAction}
-          isLoading={isLoading}
-        />
+      <div className="bg-zinc-900/40 rounded-t-[32px] border-x border-t border-white/5 min-h-screen mt-2 pb-24 overflow-hidden">
+        <div className="pt-6 px-2">
+          <ComposeInput
+            onPost={handleAction}
+            isLoading={isLoading}
+          />
+        </div>
 
-        <Suspense fallback={<TodoSkeleton />}>
-          {!isClientLoaded ? (
-            <TodoSkeleton />
-          ) : (
-            <>
-              {activeTab === "logs" ? (
-                <div className="">
-                  {displayTodos.map((item) => (
-                    <StatementCard
-                      key={item.id}
-                      item={item}
+        <div className="mt-4">
+          <Suspense fallback={<TodoSkeleton />}>
+            {!isClientLoaded ? (
+              <TodoSkeleton />
+            ) : (
+              <>
+                {activeTab === "logs" ? (
+                  <div className="flex flex-col">
+                    {displayTodos.map((item, index) => (
+                      <StatementCard
+                        key={item.id}
+                        item={item}
+                        onToggle={toggleTodo}
+                        onDelete={deleteTodo}
+                        onEdit={startEditing}
+                        isLast={index === displayTodos.length - 1}
+                      />
+                    ))}
+
+                    {displayTodos.length === 0 && (
+                      <div className="p-8 text-center text-muted-foreground">
+                        No logs yet.
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="pt-2 px-4">
+                    <TodoList
+                      todos={displayTodos}
                       onToggle={toggleTodo}
                       onDelete={deleteTodo}
                       onEdit={startEditing}
+                      editingTodoId={editingTodoId}
+                      editText={editText}
+                      setEditText={setEditText}
+                      handleEditTodo={handleEditTodo}
+                      cancelEditing={cancelEditing}
                     />
-                  ))}
-
-                  {displayTodos.length === 0 && (
-                    <div className="p-8 text-center text-muted-foreground">
-                      No logs yet.
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="pt-2">
-                  <TodoList
-                    todos={displayTodos}
-                    onToggle={toggleTodo}
-                    onDelete={deleteTodo}
-                    onEdit={startEditing}
-                    editingTodoId={editingTodoId}
-                    editText={editText}
-                    setEditText={setEditText}
-                    handleEditTodo={handleEditTodo}
-                    cancelEditing={cancelEditing}
-                  />
-                  {displayTodos.length === 0 && (
-                    <div className="p-8 text-center text-muted-foreground">
-                      No tasks found.
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </Suspense>
+                    {displayTodos.length === 0 && (
+                      <div className="p-8 text-center text-muted-foreground">
+                        No tasks found.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </Suspense>
+        </div>
       </div>
 
       <NewThreadDialog
