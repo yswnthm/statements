@@ -1,37 +1,24 @@
 "use client";
 
-import { useState, useEffect, Suspense, useRef } from "react";
-import { format } from "date-fns";
-import { useMicrophonePermission } from "@/hooks/use-microphone-permission";
+import { useState, useEffect, Suspense } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { determineAction } from "@/app/actions";
 import { TodoItem, SortOption } from "@/types";
 import {
   filterTodosByDate,
   sortTodos,
-  calculateProgress,
-  formatDate,
   serializeTodo,
 } from "@/lib/utils/todo";
 import { Model } from "@/lib/models";
 
 // custom components
 import { TodoSkeleton } from "./TodoSkeleton";
-import { LoadingState } from "./LoadingState";
-import { EmptyState } from "./EmptyState";
-
-// New UI Components
 import { AppShell } from "@/components/layout/AppShell";
-import { FeedHeader } from "@/components/feed/FeedHeader";
 import { ComposeInput } from "@/components/feed/ComposeInput";
 import { StatementCard } from "@/components/feed/StatementCard";
-
-import { TodoList } from "./TodoList";
 import { NewThreadDialog } from "@/components/feed/NewThreadDialog";
 
 export default function Todo() {
-  const [activeTab, setActiveTab] = useState<"logs" | "todos">("logs");
   const [isLoading, setIsLoading] = useState(false);
   const [isClientLoaded, setIsClientLoaded] = useState(false);
   const [todos, setTodos] = useLocalStorage<TodoItem[]>("todos", []);
@@ -40,14 +27,10 @@ export default function Todo() {
     "selectedModel",
     "statements-default"
   );
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  // const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [isComposeOpen, setIsComposeOpen] = useState(false);
-
-  const micPermission = useMicrophonePermission();
-  const { isRecording, isProcessingSpeech, startRecording, stopRecording } =
-    useSpeechRecognition();
 
   // Add effect to indicate client-side hydration is complete
   useEffect(() => {
@@ -61,13 +44,8 @@ export default function Todo() {
 
   const sortedTodos = isClientLoaded ? sortTodos(filteredTodos, "newest") : [];
 
-  const displayTodos = sortedTodos.filter(todo => {
-    if (activeTab === "logs") {
-      return true;
-    } else {
-      return ["task", "reminder", "goal"].includes(todo.category || "") || todo.timeline === "future";
-    }
-  });
+  // Logs show everything
+  const displayTodos = sortedTodos;
 
   const handleAction = async (text: string) => {
     if (!text.trim()) return;
@@ -192,22 +170,15 @@ export default function Todo() {
     setEditText(text);
   };
 
-  const handleEditTodo = (updatedTodo: TodoItem) => {
-    setTodos(todos.map(t => t.id === updatedTodo.id ? updatedTodo : t));
-    setEditingTodoId(null);
-    setEditText("");
-  };
-
-  const cancelEditing = () => {
-    setEditingTodoId(null);
-    setEditText("");
-  };
-
   return (
     <AppShell onComposeClick={() => setIsComposeOpen(true)}>
-      <FeedHeader activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-2 border-b border-border mb-4">
+        <div className="flex items-center h-14">
+          <h1 className="text-lg font-semibold text-foreground">Logs</h1>
+        </div>
+      </div>
 
-      <div className="bg-zinc-900/40 rounded-t-[32px] border-x border-t border-white/5 min-h-screen mt-2 pb-24 overflow-hidden">
+      <div className="bg-zinc-900/40 rounded-t-[32px] border-x border-t border-white/5 min-h-[calc(100vh-100px)] pb-24 overflow-hidden">
         <div>
           <ComposeInput
             onPost={handleAction}
@@ -220,47 +191,24 @@ export default function Todo() {
             {!isClientLoaded ? (
               <TodoSkeleton />
             ) : (
-              <>
-                {activeTab === "logs" ? (
-                  <div className="flex flex-col divide-y divide-border">
-                    {displayTodos.map((item, index) => (
-                      <StatementCard
-                        key={item.id}
-                        item={item}
-                        onToggle={toggleTodo}
-                        onDelete={deleteTodo}
-                        onEdit={startEditing}
-                        isLast={index === displayTodos.length - 1}
-                      />
-                    ))}
+              <div className="flex flex-col divide-y divide-border">
+                {displayTodos.map((item, index) => (
+                  <StatementCard
+                    key={item.id}
+                    item={item}
+                    onToggle={toggleTodo}
+                    onDelete={deleteTodo}
+                    onEdit={startEditing}
+                    isLast={index === displayTodos.length - 1}
+                  />
+                ))}
 
-                    {displayTodos.length === 0 && (
-                      <div className="p-8 text-center text-muted-foreground">
-                        No logs yet.
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="pt-2 px-4">
-                    <TodoList
-                      todos={displayTodos}
-                      onToggle={toggleTodo}
-                      onDelete={deleteTodo}
-                      onEdit={startEditing}
-                      editingTodoId={editingTodoId}
-                      editText={editText}
-                      setEditText={setEditText}
-                      handleEditTodo={handleEditTodo}
-                      cancelEditing={cancelEditing}
-                    />
-                    {displayTodos.length === 0 && (
-                      <div className="p-8 text-center text-muted-foreground">
-                        No tasks found.
-                      </div>
-                    )}
+                {displayTodos.length === 0 && (
+                  <div className="p-8 text-center text-muted-foreground">
+                    No logs yet.
                   </div>
                 )}
-              </>
+              </div>
             )}
           </Suspense>
         </div>
