@@ -12,6 +12,8 @@ export type DetermineActionResponse = {
         sortBy?: "newest" | "oldest" | "alphabetical" | "completed";
         status?: "complete" | "incomplete";
         listToClear?: "all" | "completed" | "incomplete";
+        category?: "goal" | "task" | "reminder" | "statement";
+        timeline?: "past" | "current" | "future";
     }>;
 };
 

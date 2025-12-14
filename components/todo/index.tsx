@@ -69,6 +69,8 @@ import { Model } from "@/lib/models";
 // custom components
 import { TodoSkeleton } from "./TodoSkeleton";
 import { TodoList } from "./TodoList";
+import { TodoSection } from "./TodoSection";
+import { LogSection } from "./LogSection";
 import { InputLoadingIndicator } from "./InputLoadingIndicator";
 import { MicButton } from "./MicButton";
 import { FaqContent } from "./FaqContent";
@@ -279,6 +281,8 @@ export default function Todo() {
                 emoji: action.emoji || selectedEmoji,
                 date: todoDate,
                 time: action.time,
+                category: action.category,
+                timeline: action.timeline,
               })
             );
             break;
@@ -333,6 +337,8 @@ export default function Todo() {
                       ? new Date(action.targetDate)
                       : todo.date,
                     time: action.time || todo.time,
+                    category: action.category || todo.category,
+                    timeline: action.timeline || todo.timeline,
                   });
                   console.log("AI updated todo:", updatedTodo);
                   return updatedTodo;
@@ -547,22 +553,75 @@ export default function Todo() {
           ) : sortedTodos.length === 0 && !isLoading ? (
             <EmptyState selectedDate={selectedDate} focusInput={focusInput} />
           ) : (
-            <TodoList
-              todos={sortedTodos}
-              onToggle={toggleTodo}
-              onDelete={deleteTodo}
-              onEdit={startEditing}
-              editingTodoId={editingTodoId}
-              editText={editText}
-              editEmoji={editEmoji}
-              setEditText={setEditText}
-              setEditEmoji={setEditEmoji}
-              handleEditTodo={handleEditTodo}
-              cancelEditing={cancelEditing}
-            />
+            <div className="space-y-8">
+              {/* Separate Todos and Logs */}
+              {
+                (() => {
+                  const todoItems = sortedTodos.filter((todo) => {
+                    // Keep completed items in todos to show progress
+                    if (todo.completed) return true;
+
+                    // Explicit categories/timelines
+                    if (["task", "reminder", "goal"].includes(todo.category || "")) return true;
+                    if (todo.timeline === "future") return true;
+
+                    // Default behavior if classifications are missing:
+                    // If it has "reminder" in text? No, rely on AI.
+                    // If it's undefined, assume it's a statement (Log) unless likely a task?
+                    // Let's assume undefined -> Log if it has no time/date future?
+                    // Actually, for now, let's put "log" items in logs.
+                    if (todo.category === "statement" || ["past", "current"].includes(todo.timeline || "")) return false;
+
+                    return true; // Default to Todo
+                  });
+
+                  const logItems = sortedTodos.filter((todo) => {
+                    if (todo.completed) return false; // Completed usually implies task
+                    if (["task", "reminder", "goal"].includes(todo.category || "")) return false;
+                    if (todo.timeline === "future") return false;
+
+                    return true; // Use the inverse or explicit check
+                  });
+
+                  return (
+                    <>
+                      <TodoSection
+                        todos={todoItems}
+                        onToggle={toggleTodo}
+                        onDelete={deleteTodo}
+                        onEdit={startEditing}
+                        editingTodoId={editingTodoId}
+                        editText={editText}
+                        editEmoji={editEmoji}
+                        setEditText={setEditText}
+                        setEditEmoji={setEditEmoji}
+                        handleEditTodo={handleEditTodo}
+                        cancelEditing={cancelEditing}
+                      />
+
+                      {logItems.length > 0 && <div className="border-t border-muted/40 my-4" />}
+
+                      <LogSection
+                        todos={logItems}
+                        onToggle={toggleTodo}
+                        onDelete={deleteTodo}
+                        onEdit={startEditing}
+                        editingTodoId={editingTodoId}
+                        editText={editText}
+                        editEmoji={editEmoji}
+                        setEditText={setEditText}
+                        setEditEmoji={setEditEmoji}
+                        handleEditTodo={handleEditTodo}
+                        cancelEditing={cancelEditing}
+                      />
+                    </>
+                  );
+                })()
+              }
+            </div>
           )}
         </Suspense>
-      </div>
+      </div >
 
       <div
         className={cn(
@@ -790,6 +849,6 @@ export default function Todo() {
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 }
