@@ -9,7 +9,6 @@ import {
     ChatCircle,
     Repeat,
     PaperPlaneTilt,
-    Check,
     Trash,
     PencilSimple,
     DotsThree
@@ -93,40 +92,39 @@ export function StatementCard({ item, onToggle, onDelete, onEdit, isLast }: Stat
                 </div>
 
                 {/* Footer / Actions */}
-                <div className="flex items-center gap-6 -ml-2">
+                <div className="flex items-center gap-4 mt-2 -ml-2">
                     {/* "Like" / Complete button */}
                     <Button
                         variant="ghost"
                         size="icon"
                         className={cn(
-                            "group/btn relative h-9 w-9 rounded-full hover:bg-transparent transition-colors",
-                            isCompleted ? "text-green-500" : "text-muted-foreground"
+                            "group/btn relative h-8 w-8 rounded-full hover:bg-transparent transition-colors",
+                            isCompleted ? "text-red-500" : "text-muted-foreground"
                         )}
                         onClick={(e) => {
                             e.stopPropagation();
                             onToggle?.(item.id);
                         }}
                     >
-                        {isCompleted ? (
-                            <div className="p-1.5 bg-green-500/10 rounded-full">
-                                <Check weight="bold" className="w-5 h-5 text-green-600" />
-                            </div>
-                        ) : (
-                            <Heart className="w-5 h-5 group-hover/btn:text-red-500 transition-colors" />
-                        )}
-                        {/* Count could go here */}
+                        <Heart
+                            weight={isCompleted ? "fill" : "regular"}
+                            className={cn(
+                                "w-5 h-5 transition-colors",
+                                !isCompleted && "group-hover/btn:text-red-500"
+                            )}
+                        />
                     </Button>
 
-                    <Button variant="ghost" size="icon" className="group/btn h-9 w-9 rounded-full hover:bg-transparent text-muted-foreground">
-                        <ChatCircle className="w-5 h-5 group-hover/btn:text-foreground transition-colors" />
+                    <Button variant="ghost" size="icon" className="group/btn h-8 w-8 rounded-full hover:bg-transparent text-muted-foreground">
+                        <ChatCircle className="w-5 h-5 group-hover/btn:text-blue-500 transition-colors" />
                     </Button>
 
-                    <Button variant="ghost" size="icon" className="group/btn h-9 w-9 rounded-full hover:bg-transparent text-muted-foreground">
-                        <Repeat className="w-5 h-5 group-hover/btn:text-foreground transition-colors" />
+                    <Button variant="ghost" size="icon" className="group/btn h-8 w-8 rounded-full hover:bg-transparent text-muted-foreground">
+                        <Repeat className="w-5 h-5 group-hover/btn:text-green-500 transition-colors" />
                     </Button>
 
-                    <Button variant="ghost" size="icon" className="group/btn h-9 w-9 rounded-full hover:bg-transparent text-muted-foreground">
-                        <PaperPlaneTilt className="w-5 h-5 group-hover/btn:text-foreground transition-colors" />
+                    <Button variant="ghost" size="icon" className="group/btn h-8 w-8 rounded-full hover:bg-transparent text-muted-foreground">
+                        <PaperPlaneTilt className="w-5 h-5 group-hover/btn:text-blue-500 transition-colors" />
                     </Button>
                 </div>
             </div>
