@@ -28,6 +28,7 @@ import { ComposeInput } from "@/components/feed/ComposeInput";
 import { StatementCard } from "@/components/feed/StatementCard";
 
 import { TodoList } from "./TodoList";
+import { NewThreadDialog } from "@/components/feed/NewThreadDialog";
 
 export default function Todo() {
   const [activeTab, setActiveTab] = useState<"logs" | "todos">("logs");
@@ -42,6 +43,7 @@ export default function Todo() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
 
   const micPermission = useMicrophonePermission();
   const { isRecording, isProcessingSpeech, startRecording, stopRecording } =
@@ -206,7 +208,7 @@ export default function Todo() {
   };
 
   return (
-    <AppShell>
+    <AppShell onComposeClick={() => setIsComposeOpen(true)}>
       <FeedHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="pb-24">
@@ -262,7 +264,14 @@ export default function Todo() {
           )}
         </Suspense>
       </div>
-    </AppShell>
+
+      <NewThreadDialog
+        open={isComposeOpen}
+        onOpenChange={setIsComposeOpen}
+        onPost={handleAction}
+        isLoading={isLoading}
+      />
+    </AppShell >
   );
 }
 
