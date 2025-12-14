@@ -102,6 +102,21 @@ export const determineAction: DetermineActionFn = async (text, emoji, todos, mod
         ${todos?.map(todo => `- ${todo.id}: ${todo.text} (${todo.emoji})`).join("\n")}
         </todo_list>` : ""}
 
+        ## Quantitative Updates
+        - **Tracking Progress**:
+            - If the user reports partial progress on a task (e.g., "I drank 2L of water") and a corresponding task exists (e.g., "Drink 4L of water") or the user says "add I drank 2L of water":
+            - **Do NOT** mark the original task as complete effectively unless the goal is fully reached.
+            - **Edit** the existing task to reflect the remaining amount.
+            - Example: 
+                - Existing Task: "Drink 4L of water"
+                - User Input: "I drank 2L of water"
+                - Analysis: 4L (Goal) - 2L (Progress) = 2L (Remaining)
+                - Action: "edit", TodoId: <id>, Text: "Drink 2L of water left" (or keep original text if tracking generally, but user asked to update).
+                - BETTER APPROACH: If the user says "I drank 2L", JUST EDIT the future goal. Do not create a separate log entry unless explicitly asked.
+                - If the user explicitly asks to update: "update task", prioritize the edit.
+                - If the user just says "Drank 2L", assume they want to update the goal.
+                - Action: "edit", TodoId: <matching_id>, Text: "Drink 2L of water" (calculated remaining).
+
         ## strict rules
         - **Always** return an array of actions.
         - **Actions**: ${["add", "delete", "mark", "sort", "edit", "clear"].join(", ")}
