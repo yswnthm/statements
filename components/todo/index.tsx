@@ -2,50 +2,6 @@
 
 import { useState, useEffect, Suspense, useRef } from "react";
 import { format } from "date-fns";
-import {
-  List,
-  Check,
-  X,
-  Robot,
-  Question,
-} from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { useMicrophonePermission } from "@/hooks/use-microphone-permission";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
@@ -62,91 +18,22 @@ import { Model } from "@/lib/models";
 
 // custom components
 import { TodoSkeleton } from "./TodoSkeleton";
-import { TodoList } from "./TodoList";
-import { TodoSection } from "./TodoSection";
-import { LogSection } from "./LogSection";
-import { InputLoadingIndicator } from "./InputLoadingIndicator";
-import { MicButton } from "./MicButton";
-import { FaqContent } from "./FaqContent";
-import { EmptyState } from "./EmptyState";
 import { LoadingState } from "./LoadingState";
-import { ThemeToggleButton } from "@/components/theme-toggle";
-import { modelOptions } from "@/lib/models";
+import { EmptyState } from "./EmptyState";
 
-// Add these interfaces before the main component
-interface MenuItemProps {
-  icon?: React.ElementType;
-  label: string;
-  onClick?: () => void;
-  selected?: boolean;
-  variant?: "default" | "danger";
-  endIcon?: React.ReactNode;
-}
+// New UI Components
+import { AppShell } from "@/components/layout/AppShell";
+import { FeedHeader } from "@/components/feed/FeedHeader";
+import { ComposeInput } from "@/components/feed/ComposeInput";
+import { StatementCard } from "@/components/feed/StatementCard";
 
-interface MenuSectionProps {
-  title: string;
-  children: React.ReactNode;
-}
-
-// Add these components before the main component
-const MenuItem = ({
-  icon: Icon,
-  label,
-  onClick,
-  selected,
-  variant = "default",
-  endIcon,
-}: MenuItemProps) => (
-  <DropdownMenuItem
-    onClick={onClick}
-    className={cn(
-      "rounded-lg cursor-pointer flex items-center group h-8 px-2",
-      selected && "bg-muted",
-      variant === "danger" &&
-      "text-red-600 focus:text-red-600 focus:bg-red-100 dark:hover:bg-red-900/50 dark:hover:text-red-400 hover:text-red-600"
-    )}
-  >
-    {Icon && (
-      <Icon
-        className={cn(
-          "w-3.5 h-3.5 mr-2",
-          variant === "danger" &&
-          "group-hover:text-red-600 dark:group-hover:text-red-400"
-        )}
-      />
-    )}
-    <span className="text-sm">{label}</span>
-    {endIcon && (
-      <span
-        className={cn(
-          "ml-auto",
-          typeof selected === "boolean" &&
-          !selected &&
-          "text-muted-foreground/50",
-          variant === "danger" &&
-          "group-hover:text-red-600 dark:group-hover:text-red-400"
-        )}
-      >
-        {endIcon}
-      </span>
-    )}
-  </DropdownMenuItem>
-);
-
-const MenuSection = ({ title, children }: MenuSectionProps) => (
-  <div className="space-y-0.5">
-    <div className="px-2 py-1 text-xs font-medium text-muted-foreground/70">
-      {title}
-    </div>
-    {children}
-  </div>
-);
+import { TodoList } from "./TodoList";
 
 export default function Todo() {
+  const [activeTab, setActiveTab] = useState<"logs" | "todos">("logs");
   const [isLoading, setIsLoading] = useState(false);
   const [isClientLoaded, setIsClientLoaded] = useState(false);
   const [todos, setTodos] = useLocalStorage<TodoItem[]>("todos", []);
-  const [newTodo, setNewTodo] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedModel, setSelectedModel] = useLocalStorage<Model>(
     "selectedModel",
@@ -155,12 +42,7 @@ export default function Todo() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
-  const [showFaqDialog, setShowFaqDialog] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [isInputFocused, setIsInputFocused] = useState(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
   const micPermission = useMicrophonePermission();
   const { isRecording, isProcessingSpeech, startRecording, stopRecording } =
     useSpeechRecognition();
@@ -170,82 +52,27 @@ export default function Todo() {
     setIsClientLoaded(true);
   }, []);
 
-  // Add effect to detect mobile screens
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkIfMobile();
-
-    // Add event listener for window resize
-    window.addEventListener("resize", checkIfMobile);
-
-    // Clean up
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
-
-  // Add effect to detect standalone PWA mode
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      // Check if the app is running in standalone mode (PWA)
-      const isInStandaloneMode =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone ||
-        document.referrer.includes("android-app://");
-
-      setIsStandalone(isInStandaloneMode);
-
-      // Listen for changes in display mode
-      const mediaQueryList = window.matchMedia("(display-mode: standalone)");
-      const handleChange = (e: MediaQueryListEvent) => {
-        setIsStandalone(
-          e.matches || (window.navigator as any).standalone || false
-        );
-      };
-
-      // Modern browsers use addEventListener, older ones use addListener
-      if (mediaQueryList.addEventListener) {
-        mediaQueryList.addEventListener("change", handleChange);
-      } else if (mediaQueryList.addListener) {
-        // For Safari < 14
-        mediaQueryList.addListener(handleChange);
-      }
-
-      return () => {
-        if (mediaQueryList.removeEventListener) {
-          mediaQueryList.removeEventListener("change", handleChange);
-        } else if (mediaQueryList.removeListener) {
-          mediaQueryList.removeListener(handleChange);
-        }
-      };
-    }
-  }, []);
-
-  // Only process todos after client-side hydration
+  // Filter and sort todos
   const filteredTodos = isClientLoaded
     ? filterTodosByDate(todos, selectedDate)
     : [];
-  const sortedTodos = isClientLoaded ? sortTodos(filteredTodos, sortBy) : [];
 
-  // Get statistics only after client-side hydration
-  const completedCount = isClientLoaded
-    ? filteredTodos.filter((todo) => todo.completed).length
-    : 0;
-  const remainingCount = isClientLoaded
-    ? filteredTodos.filter((todo) => !todo.completed).length
-    : 0;
-  const progress = isClientLoaded ? calculateProgress(filteredTodos) : 0;
+  const sortedTodos = isClientLoaded ? sortTodos(filteredTodos, "newest") : [];
+
+  const displayTodos = sortedTodos.filter(todo => {
+    if (activeTab === "logs") {
+      return todo.category === "statement" || todo.timeline === "past" || (!todo.category && !todo.timeline);
+    } else {
+      return ["task", "reminder", "goal"].includes(todo.category || "") || todo.timeline === "future";
+    }
+  });
 
   const handleAction = async (text: string) => {
     if (!text.trim()) return;
 
     setIsLoading(true);
-    setNewTodo("");
 
     let newTodos = [...todos];
-    let clearActionExecuted = false;
 
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -257,6 +84,7 @@ export default function Todo() {
           timezone
         )
       ).actions;
+
       actions.forEach((action) => {
         switch (action.action) {
           case "add":
@@ -264,6 +92,13 @@ export default function Todo() {
             if (action.targetDate) {
               todoDate = new Date(action.targetDate);
             }
+            // Auto-switch tab based on category
+            if (["task", "reminder", "goal"].includes(action.category || "") || action.timeline === "future") {
+              setActiveTab("todos");
+            } else {
+              setActiveTab("logs");
+            }
+
             newTodos.push(
               serializeTodo({
                 id: Math.random().toString(36).substring(7),
@@ -302,23 +137,11 @@ export default function Todo() {
             }
             break;
 
-          case "sort":
-            if (action.sortBy) {
-              setSortBy(action.sortBy);
-            }
-            break;
-
           case "edit":
             if (action.todoId && action.text) {
-              console.log("AI editing todo:", {
-                todoId: action.todoId,
-                newText: action.text,
-                newDate: action.targetDate,
-              });
-
               newTodos = newTodos.map((todo) => {
                 if (todo.id === action.todoId) {
-                  const updatedTodo = serializeTodo({
+                  return serializeTodo({
                     ...todo,
                     text: action.text || todo.text,
                     date: action.targetDate
@@ -328,49 +151,9 @@ export default function Todo() {
                     category: action.category || todo.category,
                     timeline: action.timeline || todo.timeline,
                   });
-                  console.log("AI updated todo:", updatedTodo);
-                  return updatedTodo;
                 }
                 return todo;
               });
-            }
-            break;
-
-          case "clear":
-            clearActionExecuted = true;
-            if (action.listToClear) {
-              switch (action.listToClear) {
-                case "all":
-                  // Clear all todos for the selected date
-                  newTodos = todos.filter(
-                    (todo) =>
-                      format(todo.date, "yyyy-MM-dd") !==
-                      format(selectedDate, "yyyy-MM-dd")
-                  );
-                  break;
-                case "completed":
-                  // Clear completed todos for the selected date
-                  newTodos = todos.filter(
-                    (todo) =>
-                      !(
-                        todo.completed &&
-                        format(todo.date, "yyyy-MM-dd") ===
-                        format(selectedDate, "yyyy-MM-dd")
-                      )
-                  );
-                  break;
-                case "incomplete":
-                  // Clear incomplete todos for the selected date
-                  newTodos = todos.filter(
-                    (todo) =>
-                      !(
-                        !todo.completed &&
-                        format(todo.date, "yyyy-MM-dd") ===
-                        format(selectedDate, "yyyy-MM-dd")
-                      )
-                  );
-                  break;
-              }
             }
             break;
         }
@@ -379,6 +162,7 @@ export default function Todo() {
       setTodos(newTodos);
     } catch (error) {
       console.error("AI Action failed:", error);
+      // Fallback add
       setTodos([
         ...todos,
         serializeTodo({
@@ -410,387 +194,75 @@ export default function Todo() {
     setEditText(text);
   };
 
+  const handleEditTodo = (updatedTodo: TodoItem) => {
+    setTodos(todos.map(t => t.id === updatedTodo.id ? updatedTodo : t));
+    setEditingTodoId(null);
+    setEditText("");
+  };
+
   const cancelEditing = () => {
     setEditingTodoId(null);
     setEditText("");
   };
 
-  const handleEditTodo = (updatedTodo: TodoItem) => {
-    if (updatedTodo.text.trim()) {
-      console.log("Editing todo:", updatedTodo);
-
-      setTodos(
-        todos.map((todo) => {
-          if (todo.id === updatedTodo.id) {
-            const updated = serializeTodo({
-              ...todo,
-              text: updatedTodo.text,
-              time: updatedTodo.time,
-            });
-            console.log("Updated todo:", updated);
-            return updated;
-          }
-          return todo;
-        })
-      );
-    }
-    setEditingTodoId(null);
-    setEditText("");
-  };
-
-  const clearAllTodos = () => {
-    setTodos(
-      todos.filter(
-        (todo) =>
-          format(todo.date, "yyyy-MM-dd") !== format(selectedDate, "yyyy-MM-dd")
-      )
-    );
-  };
-
-  const clearCompletedTodos = () => {
-    setTodos(
-      todos.filter(
-        (todo) =>
-          !(
-            todo.completed &&
-            format(todo.date, "yyyy-MM-dd") ===
-            format(selectedDate, "yyyy-MM-dd")
-          )
-      )
-    );
-  };
-
-  const clearIncompleteTodos = () => {
-    setTodos(
-      todos.filter(
-        (todo) =>
-          !(
-            !todo.completed &&
-            format(todo.date, "yyyy-MM-dd") ===
-            format(selectedDate, "yyyy-MM-dd")
-          )
-      )
-    );
-  };
-
-  const handleInputKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !isLoading) {
-      handleAction(newTodo);
-    }
-  };
-
-  const handleSpeechResult = async () => {
-    if (isRecording) {
-      const text = await stopRecording();
-      if (text) {
-        setNewTodo(text);
-      }
-    }
-  };
-
-  const focusInput = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
   return (
-    <div className="max-w-md w-full mx-auto p-4 space-y-4 pb-24 flex flex-col">
-      <div className="space-y-6 pt-12 text-center">
-        <div className="space-y-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <h1 className="text-4xl font-bold tracking-tight cursor-pointer hover:opacity-70 transition-opacity">
-                {formatDate(selectedDate)}
-              </h1>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => {
-                  if (date) {
-                    setSelectedDate(date);
-                  }
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <div className="text-muted-foreground flex items-center justify-center gap-2 text-sm font-medium">
-            {remainingCount > 0 ? (
-              <span>{remainingCount} task{remainingCount === 1 ? '' : 's'} remaining</span>
-            ) : (
-              <span>All tasks completed</span>
-            )}
-          </div>
-        </div>
-      </div>
+    <AppShell>
+      <FeedHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="-mx-4 flex-1">
+      <div className="pb-24">
+        <ComposeInput
+          onPost={handleAction}
+          isLoading={isLoading}
+        />
+
         <Suspense fallback={<TodoSkeleton />}>
           {!isClientLoaded ? (
             <TodoSkeleton />
-          ) : sortedTodos.length === 0 && isLoading ? (
-            <LoadingState />
-          ) : sortedTodos.length === 0 && !isLoading ? (
-            <EmptyState selectedDate={selectedDate} focusInput={focusInput} />
           ) : (
-            <div className="space-y-8">
-              {/* Separate Todos and Logs */}
-              {
-                (() => {
-                  const todoItems = sortedTodos.filter((todo) => {
-                    // Keep completed items in todos to show progress
-                    if (todo.completed) return true;
+            <>
+              {activeTab === "logs" ? (
+                <div className="">
+                  {displayTodos.map((item) => (
+                    <StatementCard
+                      key={item.id}
+                      item={item}
+                      onToggle={toggleTodo}
+                      onDelete={deleteTodo}
+                      onEdit={startEditing}
+                    />
+                  ))}
 
-                    // Explicit categories/timelines
-                    if (["task", "reminder", "goal"].includes(todo.category || "")) return true;
-                    if (todo.timeline === "future") return true;
-
-                    // Default behavior if classifications are missing:
-                    // If it has "reminder" in text? No, rely on AI.
-                    // If it's undefined, assume it's a statement (Log) unless likely a task?
-                    // Let's assume undefined -> Log if it has no time/date future?
-                    // Actually, for now, let's put "log" items in logs.
-                    if (todo.category === "statement" || ["past", "current"].includes(todo.timeline || "")) return false;
-
-                    return true; // Default to Todo
-                  });
-
-                  const logItems = sortedTodos.filter((todo) => {
-                    if (todo.completed) return false; // Completed usually implies task
-                    if (["task", "reminder", "goal"].includes(todo.category || "")) return false;
-                    if (todo.timeline === "future") return false;
-
-                    return true; // Use the inverse or explicit check
-                  });
-
-                  return (
-                    <>
-                      <TodoSection
-                        todos={todoItems}
-                        onToggle={toggleTodo}
-                        onDelete={deleteTodo}
-                        onEdit={startEditing}
-                        editingTodoId={editingTodoId}
-                        editText={editText}
-                        setEditText={setEditText}
-                        handleEditTodo={handleEditTodo}
-                        cancelEditing={cancelEditing}
-                      />
-
-                      {logItems.length > 0 && <div className="border-t border-muted/40 my-4" />}
-
-                      <LogSection
-                        todos={logItems}
-                        onToggle={toggleTodo}
-                        onDelete={deleteTodo}
-                        onEdit={startEditing}
-                        editingTodoId={editingTodoId}
-                        editText={editText}
-                        setEditText={setEditText}
-                        handleEditTodo={handleEditTodo}
-                        cancelEditing={cancelEditing}
-                      />
-                    </>
-                  );
-                })()
-              }
-            </div>
+                  {displayTodos.length === 0 && (
+                    <div className="p-8 text-center text-muted-foreground">
+                      No logs yet.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="pt-2">
+                  <TodoList
+                    todos={displayTodos}
+                    onToggle={toggleTodo}
+                    onDelete={deleteTodo}
+                    onEdit={startEditing}
+                    editingTodoId={editingTodoId}
+                    editText={editText}
+                    setEditText={setEditText}
+                    handleEditTodo={handleEditTodo}
+                    cancelEditing={cancelEditing}
+                  />
+                  {displayTodos.length === 0 && (
+                    <div className="p-8 text-center text-muted-foreground">
+                      No tasks found.
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </Suspense>
-      </div >
-
-      <div
-        className={cn(
-          "fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background to-transparent transition-all duration-200 ease-in-out",
-          isStandalone && "pb-8",
-          isInputFocused && "pb-4"
-        )}
-      >
-        <div className="max-w-xl mx-auto flex items-center gap-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              asChild
-              className="!outline-0 !ring-0 focus:!outline-0 focus:!ring-0"
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 h-10 w-10 rounded-full hover:bg-muted/50 text-muted-foreground transition-colors"
-              >
-                <List className="w-5 h-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-52 rounded-xl p-1"
-              align="start"
-              sideOffset={8}
-            >
-              <MenuSection title="Appearance">
-                <div className="px-2 py-1 flex justify-start">
-                  <ThemeToggleButton />
-                </div>
-              </MenuSection>
-
-              <DropdownMenuSeparator className="my-1" />
-
-              <MenuSection title="AI Model">
-                {modelOptions.map((model) => (
-                  <MenuItem
-                    key={model.id}
-                    label={model.name}
-                    onClick={() => setSelectedModel(model.id)}
-                    selected={selectedModel === model.id}
-                    endIcon={
-                      selectedModel === model.id ? (
-                        <Check className="w-3 h-3" />
-                      ) : undefined
-                    }
-                  />
-                ))}
-              </MenuSection>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <div className="flex-1 flex items-center bg-muted/30 hover:bg-muted/50 transition-colors rounded-full px-2 border border-transparent focus-within:border-border focus-within:bg-background focus-within:shadow-sm">
-
-
-            <Input
-              ref={inputRef}
-              type="text"
-              placeholder={
-                isLoading ? "Processing..." : "Add a task..."
-              }
-              value={newTodo}
-              onChange={(e) => setNewTodo(e.target.value)}
-              onKeyUp={handleInputKeyUp}
-              onKeyDown={handleInputKeyUp}
-              onFocus={() => setIsInputFocused(true)}
-              onBlur={() => setIsInputFocused(false)}
-              className={cn(
-                "flex-1 border-0 !bg-transparent focus:!outline-none focus:!ring-0 focus-visible:!ring-0 focus-visible:!ring-offset-0 h-12 rounded-none shadow-none px-3 text-base placeholder:text-muted-foreground/50",
-                isLoading && "text-muted-foreground"
-              )}
-              disabled={isLoading || isProcessingSpeech}
-            />
-
-            {isLoading && <InputLoadingIndicator showText={false} />}
-            {isProcessingSpeech && <InputLoadingIndicator />}
-
-            <MicButton
-              isRecording={isRecording}
-              isProcessingSpeech={isProcessingSpeech}
-              micPermission={micPermission}
-              startRecording={startRecording}
-              stopRecording={handleSpeechResult}
-              hasText={!!newTodo.trim()}
-              onSend={() => handleAction(newTodo)}
-            />
-          </div>
-
-          {isMobile ? (
-            <Drawer open={showFaqDialog} onOpenChange={setShowFaqDialog}>
-              <DrawerTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 h-9 w-9 rounded-lg hover:bg-muted"
-                  disabled={isLoading || isProcessingSpeech}
-                >
-                  <Question
-                    className="w-5 h-5 text-muted-foreground"
-                    weight="bold"
-                  />
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="px-4 [&>div:first-child]:hidden">
-                <DrawerHeader className="text-center pb-1">
-                  <div className="mx-auto w-12 h-1 bg-muted-foreground/20 rounded-full mb-4" />
-                  <DrawerTitle className="text-xl font-semibold">
-                    Help & FAQ
-                  </DrawerTitle>
-                  <DrawerDescription className="text-muted-foreground text-sm">
-                    Frequently asked questions about Statements
-                  </DrawerDescription>
-                </DrawerHeader>
-
-                <div className="overflow-auto max-h-[calc(80vh-140px)] rounded-xl border border-muted p-1 bg-background scrollbar-hide">
-                  <FaqContent />
-                </div>
-
-                <DrawerFooter className="mt-2 pb-6">
-                  <div className="flex justify-end">
-                    <DrawerClose asChild>
-                      <Button
-                        variant="secondary"
-                        className="rounded-full px-6 h-9 w-full"
-                      >
-                        Done
-                      </Button>
-                    </DrawerClose>
-                  </div>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          ) : (
-            <Dialog open={showFaqDialog} onOpenChange={setShowFaqDialog}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 h-9 w-9 rounded-lg hover:bg-muted"
-                  disabled={isLoading || isProcessingSpeech}
-                >
-                  <Question
-                    className="w-5 h-5 text-muted-foreground"
-                    weight="bold"
-                  />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md rounded-2xl border shadow-lg gap-2 p-3 [&>button]:hidden">
-                <div className="absolute right-4 top-4">
-                  <DialogClose asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 rounded-full bg-muted hover:bg-muted/80 focus:ring-0"
-                    >
-                      <X className="w-3.5 h-3.5" weight="bold" />
-                      <span className="sr-only">Close</span>
-                    </Button>
-                  </DialogClose>
-                </div>
-
-                <DialogHeader className="pb-1 space-y-1">
-                  <DialogTitle className="text-lg font-semibold">
-                    Help & FAQ
-                  </DialogTitle>
-                  <DialogDescription className="text-muted-foreground text-sm">
-                    Frequently asked questions about Statements
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="overflow-auto max-h-[calc(80vh-140px)] my-3 pr-1 rounded-xl border border-muted/50 p-1 bg-background/50 scrollbar-hide">
-                  <FaqContent />
-                </div>
-
-                <DialogFooter className="flex items-center justify-end !mt-0 !pt-0">
-                  <DialogClose asChild>
-                    <Button
-                      variant="secondary"
-                      className="rounded-full px-5 h-9 w-full"
-                    >
-                      Done
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
       </div>
-    </div >
+    </AppShell>
   );
 }
+
