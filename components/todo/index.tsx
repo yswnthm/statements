@@ -79,7 +79,7 @@ import { modelOptions } from "@/lib/models";
 
 // Add these interfaces before the main component
 interface MenuItemProps {
-  icon: React.ElementType;
+  icon?: React.ElementType;
   label: string;
   onClick?: () => void;
   selected?: boolean;
@@ -110,13 +110,15 @@ const MenuItem = ({
       "text-red-600 focus:text-red-600 focus:bg-red-100 dark:hover:bg-red-900/50 dark:hover:text-red-400 hover:text-red-600"
     )}
   >
-    <Icon
-      className={cn(
-        "w-3.5 h-3.5 mr-2",
-        variant === "danger" &&
-        "group-hover:text-red-600 dark:group-hover:text-red-400"
-      )}
-    />
+    {Icon && (
+      <Icon
+        className={cn(
+          "w-3.5 h-3.5 mr-2",
+          variant === "danger" &&
+          "group-hover:text-red-600 dark:group-hover:text-red-400"
+        )}
+      />
+    )}
     <span className="text-sm">{label}</span>
     {endIcon && (
       <span
@@ -600,7 +602,6 @@ export default function Todo() {
                 {modelOptions.map((model) => (
                   <MenuItem
                     key={model.id}
-                    icon={Robot}
                     label={model.name}
                     onClick={() => setSelectedModel(model.id)}
                     selected={selectedModel === model.id}
