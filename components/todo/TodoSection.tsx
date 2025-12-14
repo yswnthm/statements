@@ -26,9 +26,7 @@ export function TodoSection(props: TodoListProps) {
                     <div className={cn("text-muted-foreground/50 transition-transform duration-200", isCollapsed ? "-rotate-90" : "rotate-0")}>
                         <CaretDown weight="bold" className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors">
-                        To-Do & Reminders
-                    </h3>
+                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">To-Do</h3>
                 </div>
                 <div className="text-xs text-muted-foreground font-medium">
                     {count} / {total}
