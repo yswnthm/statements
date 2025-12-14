@@ -113,7 +113,7 @@ export function NewThreadDialog({
                     {/* Content Column */}
                     <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-[15px]">yeswanth</span>
+                            <span className="font-semibold text-[15px]">yswnth</span>
                             <span className="text-muted-foreground/60 text-[15px]">&gt;</span>
                             <button className="text-muted-foreground/60 hover:text-muted-foreground text-[15px] transition-colors">Add a topic</button>
                         </div>
