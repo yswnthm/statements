@@ -8,9 +8,10 @@ interface ComposeInputProps {
     onPost: (text: string) => void;
     isLoading?: boolean;
     defaultValue?: string;
+    placeholder?: string;
 }
 
-export function ComposeInput({ onPost, isLoading, defaultValue = "" }: ComposeInputProps) {
+export function ComposeInput({ onPost, isLoading, defaultValue = "", placeholder = "What's new?" }: ComposeInputProps) {
     const [text, setText] = useState(defaultValue);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -49,7 +50,7 @@ export function ComposeInput({ onPost, isLoading, defaultValue = "" }: ComposeIn
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="What's new?"
+                    placeholder={placeholder}
                     className="flex-1 bg-transparent border-none resize-none outline-none text-[15px] placeholder:text-muted-foreground/60 min-h-[36px] py-2"
                     rows={1}
                     disabled={isLoading}
