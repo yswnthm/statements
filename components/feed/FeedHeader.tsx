@@ -23,9 +23,7 @@ export function FeedHeader({ className, activeTab, onTabChange }: FeedHeaderProp
                         )}
                     >
                         Logs
-                        {activeTab === "logs" && (
-                            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-foreground rounded-full" />
-                        )}
+
                     </button>
                     <button
                         onClick={() => onTabChange("todos")}
@@ -35,9 +33,7 @@ export function FeedHeader({ className, activeTab, onTabChange }: FeedHeaderProp
                         )}
                     >
                         To-Do
-                        {activeTab === "todos" && (
-                            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-foreground rounded-full" />
-                        )}
+
                     </button>
                 </div>
 
