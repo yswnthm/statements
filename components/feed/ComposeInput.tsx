@@ -36,28 +36,25 @@ export function ComposeInput({ onPost, isLoading, defaultValue = "" }: ComposeIn
     };
 
     return (
-        <div className="flex gap-3 p-4">
-            <div className="flex-shrink-0 pt-1">
+        <div className="flex gap-3 px-4 py-4 border-b border-white/5">
+            <div className="flex-shrink-0">
                 <div className="w-9 h-9 bg-muted rounded-full overflow-hidden">
                     {/* Placeholder Avatar - replace with actual user avatar if available */}
                     <img src="/pfp2.JPG" alt="User" className="w-full h-full object-cover opacity-80" />
                 </div>
             </div>
-            <div className="flex-1 space-y-2">
-                <div className="py-2">
-                    <span className="text-sm font-semibold text-foreground">What's new?</span>
-                </div>
+            <div className="flex-1 flex gap-3 items-start">
                 <textarea
                     ref={textareaRef}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Type a a task, log, or thought..."
-                    className="w-full bg-transparent border-none resize-none outline-none text-[15px] placeholder:text-muted-foreground/60 min-h-[24px] max-h-[200px]"
+                    placeholder="What's new?"
+                    className="flex-1 bg-transparent border-none resize-none outline-none text-[15px] placeholder:text-muted-foreground/60 min-h-[36px] py-2"
                     rows={1}
                     disabled={isLoading}
                 />
-                <div className="flex justify-end pt-2">
+                <div className="flex-shrink-0">
                     <Button
                         size="sm"
                         onClick={handlePost}

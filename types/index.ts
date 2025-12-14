@@ -46,4 +46,12 @@ export interface CircleCheckboxProps {
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   className?: string;
-} 
+}
+
+export interface UserProfile {
+  name: string;
+  username: string;
+  bio: string;
+  avatar: string;
+  followers: number;
+}

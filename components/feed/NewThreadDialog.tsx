@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { UserProfile } from "@/types";
+
 interface NewThreadDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -36,6 +39,13 @@ export function NewThreadDialog({
 }: NewThreadDialogProps) {
     const [text, setText] = React.useState("");
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const [user] = useLocalStorage<UserProfile>("user", {
+        name: "Yeshhh",
+        username: "soul.stoneee",
+        bio: "I am the love I give,\nnot the love I receive.",
+        avatar: "/pfp2.JPG",
+        followers: 0
+    });
 
     // Reset text when dialog opens
     React.useEffect(() => {
@@ -101,19 +111,19 @@ export function NewThreadDialog({
                     {/* Avatar Column */}
                     <div className="pt-1 flex flex-col items-center gap-2">
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-muted relative">
-                            <img src="/pfp2.JPG" alt="User" className="w-full h-full object-cover" />
+                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                         </div>
                         {/* Thread line connector (visual only for now) */}
                         <div className="w-[2px] flex-1 bg-border/40 my-1 rounded-full min-h-[50px] opacity-50" />
                         <div className="w-4 h-4 rounded-full overflow-hidden bg-muted opacity-50">
-                            <img src="/pfp2.JPG" alt="User" className="w-full h-full object-cover grayscale" />
+                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover grayscale" />
                         </div>
                     </div>
 
                     {/* Content Column */}
                     <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-[15px]">yswnth</span>
+                            <span className="font-semibold text-[15px]">{user.username}</span>
                             <span className="text-muted-foreground/60 text-[15px]">&gt;</span>
                             <button className="text-muted-foreground/60 hover:text-muted-foreground text-[15px] transition-colors">Add a topic</button>
                         </div>

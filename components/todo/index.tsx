@@ -214,21 +214,21 @@ export default function Todo() {
       <FeedHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="bg-zinc-900/40 rounded-t-[32px] border-x border-t border-white/5 min-h-screen mt-2 pb-24 overflow-hidden">
-        <div className="pt-6 px-2">
+        <div>
           <ComposeInput
             onPost={handleAction}
             isLoading={isLoading}
           />
         </div>
 
-        <div className="mt-4">
+        <div>
           <Suspense fallback={<TodoSkeleton />}>
             {!isClientLoaded ? (
               <TodoSkeleton />
             ) : (
               <>
                 {activeTab === "logs" ? (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col divide-y divide-border">
                     {displayTodos.map((item, index) => (
                       <StatementCard
                         key={item.id}
@@ -281,4 +281,3 @@ export default function Todo() {
     </AppShell >
   );
 }
-

@@ -1,8 +1,9 @@
 "use client";
 
-import { TodoItem } from "@/types";
+import { TodoItem, UserProfile } from "@/types";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
     Heart,
     ChatCircle,
@@ -31,7 +32,16 @@ interface StatementCardProps {
 
 export function StatementCard({ item, onToggle, onDelete, onEdit, isLast }: StatementCardProps) {
     const isCompleted = item.completed;
-    const isTodo = !item.completed && ["task", "reminder", "goal"].includes(item.category || "") || item.timeline === "future"; // Reuse logic or pass it down
+    const isTodo = !item.completed && ["task", "reminder", "goal"].includes(item.category || "") || item.timeline === "future";
+
+    // Read user profile
+    const [user] = useLocalStorage<UserProfile>("user", {
+        name: "Yeshhh",
+        username: "soul.stoneee",
+        bio: "I am the love I give,\nnot the love I receive.",
+        avatar: "/pfp2.JPG",
+        followers: 0
+    });
 
     return (
         <div className={cn(
@@ -41,7 +51,7 @@ export function StatementCard({ item, onToggle, onDelete, onEdit, isLast }: Stat
             {/* Avatar Column */}
             <div className="flex-shrink-0 relative flex flex-col items-center">
                 <div className="w-9 h-9 bg-muted rounded-full overflow-hidden relative z-10">
-                    <img src="/pfp2.JPG" alt="User" className="w-full h-full object-cover" />
+                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 </div>
             </div>
 
@@ -50,7 +60,7 @@ export function StatementCard({ item, onToggle, onDelete, onEdit, isLast }: Stat
                 {/* Header */}
                 <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5 overflow-hidden">
-                        <span className="font-semibold text-[15px] truncate">yeswanth</span>
+                        <span className="font-semibold text-[15px] truncate">{user.username}</span>
                         <span className="text-muted-foreground text-[14px] truncate">
                             {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
                         </span>
