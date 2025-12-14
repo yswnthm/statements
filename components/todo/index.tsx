@@ -63,7 +63,7 @@ export default function Todo() {
 
   const displayTodos = sortedTodos.filter(todo => {
     if (activeTab === "logs") {
-      return todo.category === "statement" || todo.timeline === "past" || (!todo.category && !todo.timeline);
+      return true;
     } else {
       return ["task", "reminder", "goal"].includes(todo.category || "") || todo.timeline === "future";
     }
@@ -93,12 +93,6 @@ export default function Todo() {
             let todoDate = selectedDate;
             if (action.targetDate) {
               todoDate = new Date(action.targetDate);
-            }
-            // Auto-switch tab based on category
-            if (["task", "reminder", "goal"].includes(action.category || "") || action.timeline === "future") {
-              setActiveTab("todos");
-            } else {
-              setActiveTab("logs");
             }
 
             newTodos.push(
